@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro; // Додаємо для TextMeshPro
 
 public enum CardType // Визначаємо типи карт
 {
@@ -17,8 +17,9 @@ public class GameManager : MonoBehaviour
     public Transform enemyField;  // Поле, куди противник викладає карти
 
     [Header("Очки")]
-    public Text playerScoreText; // Текст для очок гравця
-    public Text enemyScoreText;  // Текст для очок противника
+    public TextMeshProUGUI playerScoreText; // Текст для очок гравця (TextMeshProUGUI)
+    public TextMeshProUGUI enemyScoreText;  // Текст для очок противника (TextMeshProUGUI)
+    public TextMeshProUGUI gameResultText; // Текст для результату гри
 
     private int playerScore = 0; // Очки гравця
     private int enemyScore = 0;  // Очки противника
@@ -83,6 +84,18 @@ public class GameManager : MonoBehaviour
 
         // Оновити текст очок
         UpdateScore();
+
+        // Перевірка на перемогу
+        if (playerScore >= 5)
+        {
+            gameResultText.text = "Гравець виграв гру!";
+            EndGame();
+        }
+        else if (enemyScore >= 5)
+        {
+            gameResultText.text = "Противник виграв гру!";
+            EndGame();
+        }
     }
 
     // Метод для оновлення тексту очок
@@ -90,5 +103,12 @@ public class GameManager : MonoBehaviour
     {
         playerScoreText.text = "Гравець: " + playerScore;
         enemyScoreText.text = "Противник: " + enemyScore;
+    }
+
+    // Метод для завершення гри
+    private void EndGame()
+    {
+        // Логіка завершення гри, можливо скидання очок або показ екрану результату
+        Debug.Log("Гра завершена!");
     }
 }
