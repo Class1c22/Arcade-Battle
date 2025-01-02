@@ -1698,13 +1698,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13f949914d9f6db4dbde20e1df9a3a5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerOrc: {fileID: 0}
-  playerMage: {fileID: 0}
-  playerWarrior: {fileID: 0}
-  computerOrc: {fileID: 0}
-  computerMage: {fileID: 0}
-  computerWarrior: {fileID: 0}
-  resultText: {fileID: 0}
 --- !u!1 &1124963196
 GameObject:
   m_ObjectHideFlags: 0
@@ -1870,8 +1863,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerField: {fileID: 1208069581}
   enemyField: {fileID: 894619111}
-  playerScoreText: {fileID: 0}
-  enemyScoreText: {fileID: 0}
+  playerScoreText: {fileID: 891957535}
+  enemyScoreText: {fileID: 1124963198}
+  gameResultText: {fileID: 0}
 --- !u!4 &1179637821
 Transform:
   m_ObjectHideFlags: 0

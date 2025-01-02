@@ -3,23 +3,23 @@ using UnityEngine;
 public class CardBehavior : MonoBehaviour
 {
     public CardType cardType; // Тип карти (Mage, Ogre, Dwarf)
-
-    [SerializeField] // Цей атрибут дозволяє відображати приватне поле в Inspector
     private bool isPlayerCard; // Чи це карта гравця
 
     // Метод для ініціалізації карти
     public void Initialize(CardType type, bool playerCard)
     {
-        cardType = type;         // Встановлюємо тип карти
-        isPlayerCard = playerCard; // Визначаємо, чи це карта гравця
+        cardType = type;
+        isPlayerCard = playerCard;
     }
 
     // Метод, що викликається при натисканні на карту
     public void OnCardClicked()
     {
-        if (isPlayerCard) // Перевіряємо, чи це карта гравця
+        Debug.Log("Карта була натиснута!"); // Виведе повідомлення в Console
+        if (isPlayerCard)
         {
-            GameManager.Instance.PlayerPlayCard(this); // Передаємо карту в GameManager
+            GameManager.Instance.PlayerPlayCard(this);
         }
     }
+
 }
