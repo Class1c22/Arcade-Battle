@@ -1,8 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-
-
+using TMPro;  // Заміна UnityEngine.UI на TextMeshPro
+using System.Collections;
 
 public enum CardType
 {
@@ -24,8 +22,8 @@ public class GameManager : MonoBehaviour
     public Transform enemyHand;   // Рука противника
 
     [Header("Текст для очок")]
-    public Text playerScoreText;  // Текст очок гравця
-    public Text enemyScoreText;   // Текст очок противника
+    public TMP_Text playerScoreText;  // Текст очок гравця (замінено на TMP_Text)
+    public TMP_Text enemyScoreText;   // Текст очок противника (замінено на TMP_Text)
 
     [Header("Префаб карти")]
     public GameObject cardPrefab; // Префаб карти, який дублюється
@@ -87,8 +85,11 @@ public class GameManager : MonoBehaviour
                 CreateCardCopy(enemyCard.cardType, enemyField);
                 Debug.Log($"Противник виклав карту: {enemyCard.cardType}");
 
-                // Визначаємо переможця
+                // Визначаємо переможця після того, як обидва гравці вибрали карти
                 DetermineWinner(playerField.GetChild(0).GetComponent<CardBehavior>().cardType, enemyCard.cardType);
+
+                // Затримуємо очищення полів до початку наступного раунду
+                StartCoroutine(ClearFieldsAfterDelay(1f)); // Затримка в 1 секунду (можна налаштувати)
             }
             else
             {
@@ -174,27 +175,34 @@ public class GameManager : MonoBehaviour
         }
 
         UpdateScores();
-        ClearField();
     }
 
     private void UpdateScores()
     {
-        playerScoreText.text = $"Гравець: {playerScore}";
-        enemyScoreText.text = $"Противник: {enemyScore}";
+        playerScoreText.text = playerScore.ToString();  // Перетворюємо очки на рядок
+        enemyScoreText.text = enemyScore.ToString();    // Перетворюємо очки на рядок
     }
 
-    private void ClearField()
+    private IEnumerator ClearFieldsAfterDelay(float delay)
     {
+        // Затримка перед очищенням
+        yield return new WaitForSeconds(delay);
+
         Debug.Log("Очищення полів...");
 
-        foreach (Transform child in playerField)
+        // Очищаємо полі перед додаванням нових карт
+        RemoveAllCardsFromField(playerField);
+        RemoveAllCardsFromField(enemyField);
+    }
+
+    private void RemoveAllCardsFromField(Transform field)
+    {
+        // Видаляємо всі карти з поля
+        foreach (Transform child in field)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (Transform child in enemyField)
-        {
-            Destroy(child.gameObject);
-        }
+        Debug.Log($"Поле {field.name} очищене.");
     }
 }
