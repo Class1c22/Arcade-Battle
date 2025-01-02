@@ -16,10 +16,9 @@ public class CardBehavior : MonoBehaviour
     public void OnCardClicked()
     {
         Debug.Log("Карта була натиснута!"); // Виведе повідомлення в Console
-        if (isPlayerCard)
-        {
-            GameManager.Instance.PlayerPlayCard(this);
-        }
+      
+        
+        GameManager.Instance.PlayerPlayCard(this); // Передаємо карту в GameManager
+        
     }
-
 }

@@ -1,30 +1,49 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+
 
 public enum CardType
 {
-    Mage,  // Маг
-    Ogre,  // Огр
-    Dwarf  // Гном
+    Mage,
+    Ogre,
+    Dwarf
 }
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance; // Singleton
+    public static GameManager Instance;
 
     [Header("Поля для карт")]
-    public Transform PlayerField; // Поле для карти гравця (центр)
-    public Transform EnemyField;  // Поле для карти противника (центр)
+    public Transform playerField; // Поле для карти гравця
+    public Transform enemyField;  // Поле для карти противника
 
     [Header("Руки")]
-    public Transform PlayerHand;  // Рука гравця (нижня частина екрану)
-    public Transform EnemyHand;   // Рука противника (верхня частина екрану)
+    public Transform playerHand;  // Рука гравця
+    public Transform enemyHand;   // Рука противника
+
+    [Header("Текст для очок")]
+    public Text playerScoreText;  // Текст очок гравця
+    public Text enemyScoreText;   // Текст очок противника
+
+    [Header("Префаб карти")]
+    public GameObject cardPrefab; // Префаб карти, який дублюється
+
+    [Header("Спрайти карт")]
+    public Sprite mageSprite;  // Спрайт для Мага
+    public Sprite ogreSprite;  // Спрайт для Огру
+    public Sprite dwarfSprite; // Спрайт для Гнома
+
+    private int playerScore = 0;  // Очки гравця
+    private int enemyScore = 0;   // Очки противника
 
     private void Awake()
     {
-        // Ініціалізація Singleton
         if (Instance == null)
         {
             Instance = this;
+            Debug.Log("GameManager ініціалізовано.");
         }
         else
         {
@@ -32,31 +51,150 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Метод для обробки викладення карти гравцем
     public void PlayerPlayCard(CardBehavior playerCard)
     {
-        // Переміщення карти гравця на поле
-        playerCard.transform.SetParent(PlayerField, false); // false, щоб зберегти локальну позицію
-        playerCard.transform.localPosition = Vector3.zero; // Центруємо карту на полі
+        Debug.Log("Гравець натиснув на карту!");
 
-        Debug.Log("Карта гравця переміщена на поле!");
+        // Створюємо копію карти гравця
+        if (cardPrefab != null && playerField != null)
+        {
+            CreateCardCopy(playerCard.cardType, playerField);
+            Debug.Log("Копія карти гравця створена!");
+        }
+        else
+        {
+            Debug.LogError("Префаб карти або PlayerField не прив'язаний!");
+        }
 
-        // Виклик ходу противника
+        // Викликаємо хід противника
         EnemyPlayCard();
     }
 
-
-    // Метод для ходу противника
     private void EnemyPlayCard()
     {
-        // Випадковий вибір карти противником
-        int randomIndex = Random.Range(0, EnemyHand.childCount);
-        Transform enemyCardTransform = EnemyHand.GetChild(randomIndex);
-        CardBehavior enemyCard = enemyCardTransform.GetComponent<CardBehavior>();
+        Debug.Log("Противник виконує хід...");
 
-        // Перемістити карту противника на поле
-        enemyCard.transform.SetParent(EnemyField);
+        // Перевіряємо, чи є карти у руці противника
+        if (enemyHand.childCount > 0)
+        {
+            int randomIndex = Random.Range(0, enemyHand.childCount);
+            Transform enemyCardTransform = enemyHand.GetChild(randomIndex);
+            CardBehavior enemyCard = enemyCardTransform.GetComponent<CardBehavior>();
 
-        // Додатково: тут можна додати логіку визначення переможця
+            // Створюємо копію карти противника
+            if (cardPrefab != null && enemyField != null)
+            {
+                CreateCardCopy(enemyCard.cardType, enemyField);
+                Debug.Log($"Противник виклав карту: {enemyCard.cardType}");
+
+                // Визначаємо переможця
+                DetermineWinner(playerField.GetChild(0).GetComponent<CardBehavior>().cardType, enemyCard.cardType);
+            }
+            else
+            {
+                Debug.LogError("Префаб карти або EnemyField не прив'язаний!");
+            }
+        }
+        else
+        {
+            Debug.LogError("У руці противника немає карт!");
+        }
+    }
+
+    private void CreateCardCopy(CardType cardType, Transform field)
+    {
+        Debug.Log($"Створення копії карти: {cardType}");
+
+        // Створюємо копію карти
+        GameObject cardCopy = Instantiate(cardPrefab, field, false);
+
+        // Ініціалізуємо її тип
+        CardBehavior cardBehavior = cardCopy.GetComponent<CardBehavior>();
+        if (cardBehavior != null)
+        {
+            cardBehavior.Initialize(cardType, false);
+
+            // Оновлюємо спрайт залежно від типу карти
+            UpdateCardSprite(cardCopy, cardType);
+            Debug.Log($"Карта типу {cardType} створена в {field.name}.");
+        }
+        else
+        {
+            Debug.LogError("CardBehavior відсутній у префабі карти!");
+        }
+    }
+
+    private void UpdateCardSprite(GameObject card, CardType cardType)
+    {
+        // Знаходимо компонент Image для UI
+        var cardImage = card.GetComponentInChildren<UnityEngine.UI.Image>();
+        if (cardImage == null)
+        {
+            Debug.LogError("Компонент Image не знайдено у карті!");
+            return;
+        }
+
+        // Встановлюємо відповідний спрайт залежно від типу карти
+        switch (cardType)
+        {
+            case CardType.Mage:
+                cardImage.sprite = mageSprite;
+                break;
+            case CardType.Ogre:
+                cardImage.sprite = ogreSprite;
+                break;
+            case CardType.Dwarf:
+                cardImage.sprite = dwarfSprite;
+                break;
+            default:
+                Debug.LogError("Невідомий тип карти!");
+                break;
+        }
+    }
+
+    private void DetermineWinner(CardType playerType, CardType enemyType)
+    {
+        Debug.Log($"Гравець виклав: {playerType}, Противник виклав: {enemyType}");
+
+        if (playerType == enemyType)
+        {
+            Debug.Log("Нічия!");
+        }
+        else if ((playerType == CardType.Mage && enemyType == CardType.Ogre) ||
+                 (playerType == CardType.Ogre && enemyType == CardType.Dwarf) ||
+                 (playerType == CardType.Dwarf && enemyType == CardType.Mage))
+        {
+            Debug.Log("Гравець виграв раунд!");
+            playerScore++;
+        }
+        else
+        {
+            Debug.Log("Противник виграв раунд!");
+            enemyScore++;
+        }
+
+        UpdateScores();
+        ClearField();
+    }
+
+    private void UpdateScores()
+    {
+        playerScoreText.text = $"Гравець: {playerScore}";
+        enemyScoreText.text = $"Противник: {enemyScore}";
+    }
+
+    private void ClearField()
+    {
+        Debug.Log("Очищення полів...");
+
+        foreach (Transform child in playerField)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach (Transform child in enemyField)
+        {
+            Destroy(child.gameObject);
+        }
     }
 }
